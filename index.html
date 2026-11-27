@@ -185,5 +185,18 @@ e.preventDefault();
 document.getElementById("message").textContent="Account system is being connected. Please check back soon!";
 });
 </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+const SUPABASE_URL = "https://yfpouojpeqyxxodyqlup.supabase.co/rest/v1/";
+const SUPABASE_ANON_KEY = "sb_secret_7t7D-M4eriPYFer_vDDYAw_Jteuacun";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+console.log("VINTO CONNECT: Supabase connected!");
+</script>
 </body>
 </html>
+
