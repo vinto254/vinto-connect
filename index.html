@@ -177,12 +177,52 @@ document.getElementById("message").textContent="";
 }
 
 function closeAuth(){
-document.getElementById("authModal").style.display="none";
-}
 
-document.getElementById("authForm").addEventListener("submit",function(e){
-e.preventDefault();
-document.getElementById("authForm").addEventListener("submit",function(e){
+document.getElementById("authForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const message = document.getElementById("message");
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const fullName = document.getElementById("name").value.trim();
+
+  message.textContent = "Please wait...";
+
+  try {
+    let result;
+
+    if (authMode === "signup") {
+      result = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: "buyer"
+          }
+        }
+      });
+    } else {
+      result = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+    }
+
+    if (result.error) {
+      message.textContent = result.error.message;
+      return;
+    }
+
+    message.textContent = authMode === "signup"
+      ? "Account created! Check your email."
+      : "Welcome back to VINTO CONNECT!";
+
+  } catch (error) {
+    message.textContent = error.message;
+  }
+});
+
 e.preventDefault();
 
 document.getElementById("authForm").addEventListener("submit", async function(e) {
