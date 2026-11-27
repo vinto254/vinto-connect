@@ -182,7 +182,53 @@ document.getElementById("authModal").style.display="none";
 
 document.getElementById("authForm").addEventListener("submit",function(e){
 e.preventDefault();
-document.getElementById("message").textContent="Account system is being connected. Please check back soon!";
+document.getElementById("authForm").addEventListener("submit",function(e){
+e.preventDefault();
+
+document.getElementById("authForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const message = document.getElementById("message");
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const fullName = document.getElementById("name").value.trim();
+
+  message.textContent = "Please wait...";
+
+  let result;
+
+  if (authMode === "signup") {
+    result = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          role: "buyer"
+        }
+      }
+    });
+  } else {
+    result = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+  }
+
+  if (result.error) {
+    message.textContent = result.error.message;
+    return;
+  }
+
+  if (authMode === "signup") {
+    message.textContent = result.data.session
+      ? "Welcome to VINTO CONNECT! Account created successfully."
+      : "Account created! Please check your email to confirm registration.";
+  } else {
+    message.textContent = "Welcome back to VINTO CONNECT!";
+  }
+});
+
 });
 
 async function registerUser(fullName, email, password, role) {
