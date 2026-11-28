@@ -4,324 +4,127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>VINTO CONNECT | Connect. Discover. Grow.</title>
 <meta name="description" content="Discover talent, freelance services and opportunities worldwide.">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-
-:root{
- --gold:#d9b66b;
- --dark:#090909;
- --panel:#171717;
- --muted:#aaa;
-}
-
-body{
- background:var(--dark);
- color:white;
- font-family:Arial,sans-serif;
-}
-
-button{
- cursor:pointer;
- border:none;
- padding:13px 21px;
- font-weight:bold;
- border-radius:3px;
-}
-
+:root{--gold:#d9b66b;--dark:#090909;--panel:#171717;--muted:#aaa}
+body{background:var(--dark);color:white;font-family:Arial,sans-serif}
+button{cursor:pointer;border:0;padding:13px 21px;font-weight:bold;border-radius:3px}
 button:disabled{opacity:.6;cursor:not-allowed}
-
 .gold{background:var(--gold);color:#111}
 .outline{background:transparent;color:var(--gold);border:1px solid var(--gold)}
-
-header{
- min-height:80px;padding:18px 7%;
- display:flex;align-items:center;
- justify-content:space-between;
- border-bottom:1px solid #292929;gap:15px;
-}
-
-.logo{
- font-size:22px;font-weight:bold;
- letter-spacing:2px;color:var(--gold);
-}
+header{min-height:80px;padding:18px 7%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #292929;gap:15px}
+.logo{font-size:22px;font-weight:bold;letter-spacing:2px;color:var(--gold)}
 .logo span{color:white}
-
-nav a{
- color:#ddd;text-decoration:none;
- margin:0 12px;font-size:14px;
-}
+nav a{color:#ddd;text-decoration:none;margin:0 12px;font-size:14px}
 nav a:hover{color:var(--gold)}
-
-.hero{
- min-height:560px;padding:90px 10%;
- display:flex;align-items:center;
- justify-content:space-between;gap:30px;
- background:radial-gradient(circle at 80% 40%,#45351a,#090909 48%);
-}
-
+.hero{min-height:560px;padding:90px 10%;display:flex;align-items:center;justify-content:space-between;gap:30px;background:radial-gradient(circle at 80% 40%,#45351a,#090909 48%)}
 .hero-content{max-width:650px}
 .tag{color:var(--gold);letter-spacing:3px;font-size:12px}
-
-h1{
- font:65px/1.1 Georgia,serif;
- margin:25px 0;
-}
-
+h1{font:65px/1.1 Georgia,serif;margin:25px 0}
 h1 span,h2 span{color:var(--gold)}
-
-.hero p{
- color:var(--muted);line-height:1.8;
- max-width:520px;margin-bottom:28px;
-}
-
+.hero p{color:var(--muted);line-height:1.8;max-width:520px;margin-bottom:28px}
 .hero-buttons{display:flex;gap:12px;flex-wrap:wrap}
-
-.emblem{
- font:250px Georgia,serif;
- color:transparent;
- -webkit-text-stroke:2px var(--gold);
- text-shadow:0 0 45px #d9b66b55;
-}
-
-.stats{
- display:flex;justify-content:space-around;
- flex-wrap:wrap;gap:25px;padding:35px 7%;
- background:#111;border-block:1px solid #292929;
- text-align:center;
-}
+.emblem{font:250px Georgia,serif;color:transparent;-webkit-text-stroke:2px var(--gold);text-shadow:0 0 45px #d9b66b55}
+.stats{display:flex;justify-content:space-around;flex-wrap:wrap;gap:25px;padding:35px 7%;background:#111;border-block:1px solid #292929;text-align:center}
 .stats strong{display:block;color:var(--gold);margin-bottom:8px}
 .stats small{color:#999}
-
 section.market{padding:80px 8%}
 .heading{text-align:center;margin-bottom:40px}
-.heading h2,.trust h2,.join h2{
- font:40px Georgia,serif;margin:18px 0;
-}
+.heading h2,.trust h2,.join h2{font:40px Georgia,serif;margin:18px 0}
 .heading p,.trust p,.join p{color:var(--muted);line-height:1.8}
-
-.grid{
- display:grid;grid-template-columns:repeat(4,1fr);gap:18px;
-}
-
-.card{
- background:#141414;border:1px solid #302a20;
- padding:25px 20px;min-height:165px;transition:.2s;
-}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:#141414;border:1px solid #302a20;padding:25px 20px;min-height:165px;transition:.2s}
 .card:hover{border-color:var(--gold);transform:translateY(-4px)}
 .card .icon{font-size:27px;color:var(--gold)}
 .card h3{margin:17px 0 10px;font:20px Georgia,serif}
 .card p{color:#999;font-size:13px;line-height:1.6}
-
-.trust{
- padding:75px 10%;background:#15130f;text-align:center;
-}
+.trust{padding:75px 10%;background:#15130f;text-align:center}
 .trust p{max-width:650px;margin:0 auto 25px}
-
 .join{text-align:center;padding:80px 20px}
 .join p{margin-bottom:25px}
-
-footer{
- border-top:1px solid #292929;padding:28px 8%;
- display:flex;justify-content:space-between;
- gap:15px;flex-wrap:wrap;color:#888;font-size:12px;
-}
-
-/* AUTHENTICATION */
-
-.modal{
- display:none;position:fixed;inset:0;
- background:#000e;align-items:center;
- justify-content:center;padding:20px;z-index:1000;
-}
-
-.modal-box{
- background:#151515;border:1px solid var(--gold);
- padding:32px;width:100%;max-width:410px;position:relative;
-}
-
-.modal-box h2{
- font:30px Georgia,serif;color:var(--gold);margin-bottom:22px;
-}
-
-.modal-box label,.panel label{
- display:block;color:#bbb;font-size:13px;margin-top:12px;
-}
-
-.modal-box input,.panel input,.panel textarea,.panel select{
- width:100%;padding:13px;margin-top:7px;
- background:#080808;border:1px solid #444;
- color:white;border-radius:3px;
-}
-
+footer{border-top:1px solid #292929;padding:28px 8%;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;color:#888;font-size:12px}
+.modal{display:none;position:fixed;inset:0;background:#000e;align-items:center;justify-content:center;padding:20px;z-index:1000}
+.modal-box{background:#151515;border:1px solid var(--gold);padding:32px;width:100%;max-width:410px;position:relative}
+.modal-box h2{font:30px Georgia,serif;color:var(--gold);margin-bottom:22px}
+.modal-box label,.panel label{display:block;color:#bbb;font-size:13px;margin-top:12px}
+.modal-box input,.panel input,.panel textarea,.panel select{width:100%;padding:13px;margin-top:7px;background:#080808;border:1px solid #444;color:white;border-radius:3px}
 .modal-box button[type=submit]{width:100%;margin-top:22px}
-
-.close{
- position:absolute;right:12px;top:8px;
- background:transparent;color:white;font-size:25px;padding:5px 10px;
-}
-
-#message,.notice{
- color:var(--gold);font-size:13px;margin-top:15px;line-height:1.6;
-}
-
-/* DASHBOARD */
-
-#vintoDashboard{
- display:none;min-height:100vh;
- padding:35px 7%;background:#090909;
-}
-
-.dash-header{
- display:flex;justify-content:space-between;
- align-items:center;flex-wrap:wrap;gap:20px;
- border-bottom:1px solid var(--gold);padding-bottom:22px;
-}
-
+.close{position:absolute;right:12px;top:8px;background:transparent;color:white;font-size:25px;padding:5px 10px}
+#message,.notice{color:var(--gold);font-size:13px;margin-top:15px;line-height:1.6}
+#vintoDashboard{display:none;min-height:100vh;padding:35px 7%;background:#090909}
+.dash-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;border-bottom:1px solid var(--gold);padding-bottom:22px}
 .dash-header p{color:#999;margin-top:7px}
 .welcome{margin:35px 0 25px}
 .welcome h2{font:32px Georgia,serif}
 .welcome p{color:var(--gold);margin-top:10px}
-
-.dash-grid{
- display:grid;grid-template-columns:repeat(4,1fr);
- gap:16px;margin:30px 0;
-}
-
-.dash-card{
- background:var(--panel);border:1px solid #3c3020;
- padding:23px;min-height:165px;
-}
-
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:30px 0}
+.dash-card{background:var(--panel);border:1px solid #3c3020;padding:23px;min-height:165px}
 .dash-card h3{color:var(--gold);font:20px Georgia,serif}
-.dash-card p{
- color:#aaa;font-size:13px;line-height:1.6;margin:12px 0 18px;
-}
+.dash-card p{color:#aaa;font-size:13px;line-height:1.6;margin:12px 0 18px}
 .dash-card button{font-size:12px}
-
-.panel{
- display:none;background:#151515;
- border:1px solid #40351f;padding:28px;
- margin-top:25px;max-width:950px;
-}
-
+.panel{display:none;background:#151515;border:1px solid #40351f;padding:28px;margin-top:25px;max-width:950px}
 .panel h2{font:29px Georgia,serif;color:var(--gold);margin-bottom:15px}
 .panel p{color:#aaa;line-height:1.7;margin-bottom:15px}
 .panel button{margin-top:18px;margin-right:8px}
-
-.panel .service-grid{
- display:grid;grid-template-columns:repeat(2,1fr);
- gap:15px;margin-top:20px;
-}
-
-.service{
- background:#202020;border:1px solid #45371f;padding:20px;
-}
+.panel .service-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-top:20px}
+.service{background:#202020;border:1px solid #45371f;padding:20px}
 .service h3{color:var(--gold);margin-bottom:8px}
 .service p{font-size:13px}
-
-.empty{
- padding:25px;background:#202020;color:#aaa;
- border:1px dashed #66532e;
-}
-
-.status{
- display:inline-block;padding:8px 13px;
- margin:8px 0;border-radius:3px;
- font-size:12px;font-weight:bold;
- background:#333;color:white;
-}
+.empty{padding:25px;background:#202020;color:#aaa;border:1px dashed #66532e;margin:12px 0}
+.status{display:inline-block;padding:8px 13px;margin:8px 0;border-radius:3px;font-size:12px;font-weight:bold;background:#333;color:white}
 .status.approved{background:#164b2b;color:#8dffae}
 .status.pending_review{background:#59451c;color:#ffdc8a}
 .status.rejected{background:#592020;color:#ff9999}
-
-.application-card{
- background:#202020;border:1px solid #493a20;
- padding:20px;margin:15px 0;
-}
-
-.application-card h3{color:var(--gold);margin-bottom:10px}
-.application-card p{font-size:13px;overflow-wrap:anywhere}
-
-.service-card{
- background:#202020;border:1px solid #493a20;
- padding:20px;margin:15px 0;
-}
-.service-card h3{color:var(--gold);margin-bottom:10px}
-.service-card p{font-size:13px}
-
+.application-card,.service-card{background:#202020;border:1px solid #493a20;padding:20px;margin:15px 0}
+.application-card h3,.service-card h3{color:var(--gold);margin-bottom:10px}
+.application-card p,.service-card p{font-size:13px;overflow-wrap:anywhere}
 .price{color:var(--gold);font-weight:bold}
-
 .small-note{font-size:12px;color:#999}
-
 @media(max-width:850px){
- nav{display:none}
- .hero{padding:70px 7%}
- .emblem{font-size:150px}
- h1{font-size:45px}
+ nav{display:none}.hero{padding:70px 7%}.emblem{font-size:150px}h1{font-size:45px}
  .grid,.dash-grid{grid-template-columns:repeat(2,1fr)}
 }
-
 @media(max-width:500px){
- header{padding:16px 4%}
- header .logo{font-size:17px}
- header button{padding:10px;font-size:11px}
- .hero{display:block}
- .emblem{font-size:110px;text-align:center;margin-top:25px}
+ header{padding:16px 4%}header .logo{font-size:17px}header button{padding:10px;font-size:11px}
+ .hero{display:block}.emblem{font-size:110px;text-align:center;margin-top:25px}
  .grid,.dash-grid,.panel .service-grid{grid-template-columns:1fr}
  .heading h2,.trust h2,.join h2{font-size:31px}
- footer{flex-direction:column}
- #vintoDashboard{padding:25px 5%}
+ footer{flex-direction:column}#vintoDashboard{padding:25px 5%}
 }
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-
 <header id="mainHeader">
  <div class="logo">♛ V<span>INTO</span></div>
-
  <nav>
   <a href="#home">Home</a>
   <a href="#marketplace">Marketplace</a>
   <a href="#trust">How it works</a>
  </nav>
-
  <div>
   <button class="outline" onclick="openAuth('login')">Login</button>
   <button class="gold" onclick="openAuth('signup')">Join us</button>
  </div>
 </header>
 
-<!-- HOMEPAGE -->
-
 <main id="homePage">
-
 <section class="hero" id="home">
  <div class="hero-content">
   <div class="tag">THE WORLD'S TALENT, CONNECTED</div>
   <h1>Connect.<br>Discover.<br><span>Grow.</span></h1>
-
-  <p>
-   Discover exceptional talent, offer your skills and explore opportunities.
-   VINTO CONNECT brings freelancers and clients together from every corner
-   of the world.
-  </p>
-
+  <p>Discover exceptional talent, offer your skills and explore opportunities. VINTO CONNECT brings freelancers and clients together from every corner of the world.</p>
   <div class="hero-buttons">
    <button class="gold" onclick="openAuth('signup')">Get started ↗</button>
-   <button class="outline"
-    onclick="document.getElementById('marketplace').scrollIntoView()">
-    Explore marketplace
-   </button>
+   <button class="outline" onclick="document.getElementById('marketplace').scrollIntoView()">Explore marketplace</button>
   </div>
  </div>
-
  <div class="emblem">V</div>
 </section>
 
@@ -337,7 +140,6 @@ footer{
   <h2>Find the right <span>talent.</span></h2>
   <p>Whatever your project needs, discover the right expertise.</p>
  </div>
-
  <div class="grid">
   <div class="card"><div class="icon">✳</div><h3>Graphic Design</h3><p>Logos, branding, posters and creative designs.</p></div>
   <div class="card"><div class="icon">⌘</div><h3>Programming</h3><p>Websites, applications and software solutions.</p></div>
@@ -348,25 +150,16 @@ footer{
   <div class="card"><div class="icon">✧</div><h3>Education</h3><p>Tutoring and educational services.</p></div>
   <div class="card"><div class="icon">▣</div><h3>Business Services</h3><p>Professional business solutions.</p></div>
  </div>
-
  <div style="max-width:950px;margin:40px auto 0">
-  <h2 style="color:var(--gold);font:30px Georgia,serif;text-align:center">
-   Available Services
-  </h2>
-  <div id="publicServices">
-   <div class="empty">Loading available services...</div>
-  </div>
+  <h2 style="color:var(--gold);font:30px Georgia,serif;text-align:center">Available Services</h2>
+  <div id="publicServices"><div class="empty">Loading available services...</div></div>
  </div>
 </section>
 
 <section class="trust" id="trust">
  <div class="tag">BUILT ON TRUST</div>
  <h2>Talent deserves <span>recognition.</span></h2>
- <p>
-  VINTO CONNECT brings clients and skilled professionals together.
-  Sellers undergo automated eligibility screening, with exceptional
-  applications referred for human review.
- </p>
+ <p>VINTO CONNECT brings clients and skilled professionals together. Sellers undergo automated eligibility screening, with exceptional applications referred for human review.</p>
  <button class="gold" onclick="openAuth('signup')">Become a member ↗</button>
 </section>
 
@@ -382,46 +175,30 @@ footer{
  <div>© 2026 VINTO CONNECT. All rights reserved.</div>
  <div>Connect. Discover. Grow.</div>
 </footer>
-
 </main>
-
-<!-- AUTHENTICATION -->
 
 <div class="modal" id="authModal">
  <div class="modal-box">
   <button class="close" type="button" onclick="closeAuth()">×</button>
-
   <h2 id="formTitle">Create account</h2>
-
   <form id="authForm">
    <div id="nameField">
     <label>Full name</label>
     <input id="name" type="text" placeholder="Your full name" autocomplete="name">
    </div>
-
    <label>Email address</label>
    <input id="email" type="email" placeholder="Your email" autocomplete="email" required>
-
    <label>Password</label>
-   <input id="password" type="password" placeholder="At least 8 characters"
-    minlength="8" autocomplete="current-password" required>
-
+   <input id="password" type="password" placeholder="At least 8 characters" minlength="8" autocomplete="current-password" required>
    <button class="gold" type="submit" id="submitButton">Create account</button>
   </form>
-
   <p id="message"></p>
  </div>
 </div>
 
-<!-- DASHBOARD -->
-
 <section id="vintoDashboard">
-
  <div class="dash-header">
-  <div>
-   <div class="logo">♛ VINTO CONNECT</div>
-   <p>Your professional workspace</p>
-  </div>
+  <div><div class="logo">♛ VINTO CONNECT</div><p>Your professional workspace</p></div>
   <button class="outline" onclick="logout()">Logout ↗</button>
  </div>
 
@@ -432,339 +209,206 @@ footer{
  </div>
 
  <div class="dash-grid">
-
   <div class="dash-card">
-   <h3>My Profile</h3>
-   <p>Manage your personal information.</p>
+   <h3>My Profile</h3><p>Manage your personal information.</p>
    <button class="gold" onclick="showPanel('profilePanel')">View Profile</button>
   </div>
-
   <div class="dash-card">
-   <h3>Marketplace</h3>
-   <p>Explore freelance services worldwide.</p>
+   <h3>Marketplace</h3><p>Explore freelance services worldwide.</p>
    <button class="gold" onclick="showPanel('marketPanel')">Explore Services</button>
   </div>
-
   <div class="dash-card">
-   <h3>Become a Seller</h3>
-   <p>Apply to offer your skills to global clients.</p>
+   <h3>Become a Seller</h3><p>Apply to offer your skills to global clients.</p>
    <button class="gold" onclick="openSellerPanel()">Apply Now</button>
   </div>
-
   <div class="dash-card">
-   <h3>My Orders</h3>
-   <p>Manage your transactions and orders.</p>
+   <h3>My Orders</h3><p>Manage your transactions and orders.</p>
    <button class="gold" onclick="showPanel('ordersPanel')">View Orders</button>
   </div>
-
   <div class="dash-card" id="adminCard" style="display:none">
-   <h3>Admin Control</h3>
-   <p>Review exceptional seller applications.</p>
+   <h3>Admin Control</h3><p>Review exceptional seller applications.</p>
    <button class="gold" onclick="openAdminPanel()">Admin Dashboard</button>
   </div>
-
  </div>
-
- <!-- PROFILE -->
 
  <div class="panel" id="profilePanel">
   <h2>My Profile</h2>
   <p>Update your account information.</p>
-
-  <label>Full name</label>
-  <input id="profileName" type="text" placeholder="Full name">
-
-  <label>Email address</label>
-  <input id="profileEmail" type="email" disabled>
-
+  <label>Full name</label><input id="profileName" type="text">
+  <label>Email address</label><input id="profileEmail" type="email" disabled>
   <button class="gold" onclick="saveProfile()">Save Changes</button>
   <p id="profileMessage" class="notice"></p>
  </div>
 
- <!-- MARKETPLACE -->
-
  <div class="panel" id="marketPanel">
   <h2>Explore Marketplace</h2>
   <p>Discover professional services.</p>
-  <div id="dashboardServices">
-   <div class="empty">Loading services...</div>
-  </div>
+  <div id="dashboardServices"><div class="empty">Loading services...</div></div>
  </div>
-
- <!-- SELLER APPLICATION -->
 
  <div class="panel" id="sellerPanel">
   <h2>Seller Verification</h2>
-
-  <p>
-   Apply to become a VINTO CONNECT seller. Our system automatically
-   screens completed applications. Exceptional cases are referred
-   for human review.
-  </p>
-
-  <div id="sellerCurrentStatus" class="empty">
-   Checking your seller application...
-  </div>
+  <p>Our automated screening system checks applications. Exceptional or flagged applications are referred for human review.</p>
+  <div id="sellerCurrentStatus" class="empty">Checking your seller application...</div>
 
   <div id="sellerApplicationForm">
-
    <label>Your professional skill</label>
-   <input id="sellerSkill" type="text"
-    placeholder="e.g. Graphic Design">
-
+   <input id="sellerSkill" type="text" placeholder="e.g. Graphic Design">
    <label>Describe your experience (minimum 120 characters)</label>
-   <textarea id="sellerExperience" rows="5"
-    placeholder="Describe your skills, experience and the services you can provide..."></textarea>
-
+   <textarea id="sellerExperience" rows="5" placeholder="Describe your skills, experience and services..."></textarea>
    <label style="display:flex;align-items:flex-start;gap:10px;margin-top:18px">
-    <input type="checkbox" id="sellerAttestation"
-     style="width:auto;margin-top:2px">
-    <span>
-     I confirm that the information provided is accurate and that
-     I am qualified to offer the services described.
-    </span>
+    <input type="checkbox" id="sellerAttestation" style="width:auto;margin-top:2px">
+    <span>I confirm that the information provided is accurate and that I am qualified to offer these services.</span>
    </label>
-
-   <p class="small-note">
-    Automatic approval is based on application completeness and
-    self-attestation. It is not independent identity verification.
-   </p>
-
-   <button class="gold" id="sellerSubmitButton"
-    onclick="submitSellerApplication()">
-    Submit Application
-   </button>
-
+   <p class="small-note">Automatic approval is based on application completeness and self-attestation. It does not independently verify identity or qualifications.</p>
+   <button class="gold" id="sellerSubmitButton" onclick="submitSellerApplication()">Submit Application</button>
    <p id="sellerMessage" class="notice"></p>
   </div>
  </div>
 
- <!-- APPROVED SELLER SERVICE PUBLISHING -->
-
  <div class="panel" id="publishPanel">
   <h2>Publish Your Service</h2>
-
   <p>Welcome, approved seller. Add your professional service to the marketplace.</p>
-
-  <label>Service title</label>
-  <input id="serviceTitle" type="text"
-   placeholder="e.g. Professional Logo Design">
-
+  <label>Service title</label><input id="serviceTitle" type="text" placeholder="Professional Logo Design">
   <label>Category</label>
   <select id="serviceCategory">
    <option value="">Choose category</option>
-   <option>Graphic Design</option>
-   <option>Programming</option>
-   <option>Writing</option>
-   <option>Marketing</option>
-   <option>Video Editing</option>
-   <option>Virtual Assistance</option>
-   <option>Education</option>
-   <option>Business Services</option>
-   <option>Other</option>
+   <option>Graphic Design</option><option>Programming</option>
+   <option>Writing</option><option>Marketing</option>
+   <option>Video Editing</option><option>Virtual Assistance</option>
+   <option>Education</option><option>Business Services</option><option>Other</option>
   </select>
-
-  <label>Service description</label>
-  <textarea id="serviceDescription" rows="5"
-   placeholder="Describe what clients will receive..."></textarea>
-
-  <label>Price (KES)</label>
-  <input id="servicePrice" type="number" min="1" step="0.01"
-   placeholder="Enter your price">
-
-  <button class="gold" id="publishButton" onclick="publishService()">
-   Publish Service
-  </button>
-
+  <label>Service description</label><textarea id="serviceDescription" rows="5"></textarea>
+  <label>Price (KES)</label><input id="servicePrice" type="number" min="1" step="0.01">
+  <button class="gold" id="publishButton" onclick="publishService()">Publish Service</button>
   <p id="publishMessage" class="notice"></p>
-
   <h2 style="margin-top:35px">My Published Services</h2>
   <div id="myServices"></div>
  </div>
 
- <!-- ORDERS -->
-
  <div class="panel" id="ordersPanel">
   <h2>My Orders</h2>
   <p>Your freelance transactions and orders will appear here.</p>
-  <div class="empty">
-   You have no orders yet. Explore the marketplace to discover services.
-  </div>
+  <div class="empty">You have no orders yet. Explore the marketplace to discover services.</div>
  </div>
-
- <!-- ADMIN -->
 
  <div class="panel" id="adminPanel">
   <h2>VINTO CONNECT Admin</h2>
-
   <p>Review exceptional applications requiring human attention.</p>
-
-  <button class="outline" onclick="loadAdminApplications()">
-   Refresh Applications
-  </button>
-
-  <div id="adminApplications" style="margin-top:20px">
-   <div class="empty">Loading applications...</div>
-  </div>
+  <button class="outline" onclick="loadAdminApplications()">Refresh Applications</button>
+  <div id="adminApplications" style="margin-top:20px"><div class="empty">Loading applications...</div></div>
  </div>
 
- <button class="outline" onclick="hidePanels()" style="margin-top:25px">
-  Close Section
- </button>
-
+ <button class="outline" onclick="hidePanels()" style="margin-top:25px">Close Section</button>
 </section>
 
-<!-- SUPABASE -->
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-
 // SUPABASE CONNECTION
+const SUPABASE_URL="https://yfpouojpeqyxxodyqlup.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_etcRn5iRFJ2oaUXvWhE8dw_qy8DUUUq";
 
-const SUPABASE_URL = "https://yfpouojpeqyxxodyqlup.supabase.co";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-const SUPABASE_ANON_KEY =
-"sb_publishable_etcRn5iRFJ2oaUXvWhE8dw_qy8DUUUq";
+let authMode="signup";
+let currentUser=null;
+let currentRole="buyer";
+let sessionReady=false;
 
-const supabaseClient = window.supabase.createClient(
- SUPABASE_URL,
- SUPABASE_ANON_KEY
-);
+// HELPERS
+function $(id){return document.getElementById(id)}
 
-console.log("VINTO CONNECT: Supabase connected!");
+function safeText(value){
+ return String(value??"");
+}
 
-let authMode = "signup";
-let currentUser = null;
-let currentRole = "buyer";
-
+function showStatus(status){
+ const known=["approved","pending_review","rejected"];
+ return known.includes(status)?status:"pending_review";
+}
 
 // AUTHENTICATION
-
 function openAuth(mode){
-
  authMode=mode;
-
- document.getElementById("authModal").style.display="flex";
-
- document.getElementById("formTitle").textContent=
- mode==="signup"?"Create account":"Welcome back";
-
- document.getElementById("submitButton").textContent=
- mode==="signup"?"Create account":"Login";
-
- document.getElementById("nameField").style.display=
- mode==="signup"?"block":"none";
-
- document.getElementById("name").required=mode==="signup";
-
- document.getElementById("message").textContent="";
- document.getElementById("authForm").reset();
+ $("authModal").style.display="flex";
+ $("formTitle").textContent=mode==="signup"?"Create account":"Welcome back";
+ $("submitButton").textContent=mode==="signup"?"Create account":"Login";
+ $("nameField").style.display=mode==="signup"?"block":"none";
+ $("name").required=mode==="signup";
+ $("message").textContent="";
+ $("authForm").reset();
 }
 
 function closeAuth(){
- document.getElementById("authModal").style.display="none";
+ $("authModal").style.display="none";
 }
 
-document.getElementById("authModal").addEventListener("click",function(e){
+$("authModal").addEventListener("click",function(e){
  if(e.target===this)closeAuth();
 });
 
-
 // REGISTER AND LOGIN
-
-document.getElementById("authForm").addEventListener("submit",async function(e){
-
+$("authForm").addEventListener("submit",async function(e){
  e.preventDefault();
 
- const message=document.getElementById("message");
- const button=document.getElementById("submitButton");
-
- const email=document.getElementById("email").value.trim();
- const password=document.getElementById("password").value;
- const fullName=document.getElementById("name").value.trim();
+ const message=$("message");
+ const button=$("submitButton");
+ const email=$("email").value.trim();
+ const password=$("password").value;
+ const fullName=$("name").value.trim();
 
  message.textContent="Please wait...";
  button.disabled=true;
  button.textContent="Processing...";
 
  try{
-
   let result;
 
   if(authMode==="signup"){
-
    result=await supabaseClient.auth.signUp({
-    email,
-    password,
-    options:{
-     data:{
-      full_name:fullName,
-      role:"buyer"
-     }
-    }
+    email,password,
+    options:{data:{full_name:fullName}}
    });
-
   }else{
-
-   result=await supabaseClient.auth.signInWithPassword({
-    email,password
-   });
-
+   result=await supabaseClient.auth.signInWithPassword({email,password});
   }
 
   if(result.error)throw result.error;
 
   if(authMode==="signup"){
-
    if(result.data.session){
     closeAuth();
     await openDashboard(result.data.user);
    }else{
-    message.textContent=
-     "Account created! Check your email to confirm registration before logging in.";
+    message.textContent="Account created! Check your email to confirm registration before logging in.";
    }
-
   }else{
-
    closeAuth();
    await openDashboard(result.data.user);
-
   }
 
  }catch(error){
-
   message.textContent="Error: "+error.message;
-
  }finally{
-
   button.disabled=false;
   button.textContent=authMode==="signup"?"Create account":"Login";
-
  }
-
 });
 
-
 // DASHBOARD
-
 async function openDashboard(user){
-
  if(!user)return;
 
  currentUser=user;
+ $("homePage").style.display="none";
+ $("mainHeader").style.display="none";
+ $("vintoDashboard").style.display="block";
 
- document.getElementById("homePage").style.display="none";
- document.getElementById("mainHeader").style.display="none";
- document.getElementById("vintoDashboard").style.display="block";
-
- document.getElementById("dashboardEmail").textContent=user.email;
- document.getElementById("profileEmail").value=user.email;
+ $("dashboardEmail").textContent=user.email||"";
+ $("profileEmail").value=user.email||"";
 
  let displayName=user.user_metadata?.full_name||"";
 
  try{
-
   const {data,error}=await supabaseClient
    .from("profiles")
    .select("full_name,role")
@@ -774,149 +418,102 @@ async function openDashboard(user){
   if(error)throw error;
 
   if(data){
-
    if(data.full_name)displayName=data.full_name;
    currentRole=data.role||"buyer";
-
   }else{
-
    currentRole="buyer";
-
   }
-
  }catch(error){
-
-  console.log("Profile loading:",error.message);
+  console.error("Profile loading:",error.message);
   currentRole="buyer";
-
  }
 
  if(!displayName)displayName=user.email.split("@")[0];
 
- document.getElementById("dashboardName").textContent=displayName;
- document.getElementById("profileName").value=displayName;
-
- document.getElementById("adminCard").style.display=
- currentRole==="admin"?"block":"none";
+ $("dashboardName").textContent=displayName;
+ $("profileName").value=displayName;
+ $("adminCard").style.display=currentRole==="admin"?"block":"none";
 
  hidePanels();
-
  window.scrollTo({top:0,behavior:"smooth"});
 
  await loadSellerStatus();
  await loadServices();
  await loadMyServices();
-
 }
 
-
 // RESTORE SESSION
-
 async function restoreSession(){
-
  try{
-
   const {data,error}=await supabaseClient.auth.getSession();
-
   if(error)throw error;
+  sessionReady=true;
 
   if(data.session){
    await openDashboard(data.session.user);
   }else{
    await loadServices();
   }
-
  }catch(error){
-
   console.error("Session restoration:",error.message);
-
  }
-
 }
 
-
 // AUTH STATE LISTENER
-
 supabaseClient.auth.onAuthStateChange((event,session)=>{
-
  if(event==="SIGNED_OUT"){
   currentUser=null;
   currentRole="buyer";
   showHomepage();
  }
-
 });
 
 restoreSession();
 
-
 // HOMEPAGE
-
 function showHomepage(){
-
- document.getElementById("vintoDashboard").style.display="none";
- document.getElementById("homePage").style.display="block";
- document.getElementById("mainHeader").style.display="flex";
-
+ $("vintoDashboard").style.display="none";
+ $("homePage").style.display="block";
+ $("mainHeader").style.display="flex";
  hidePanels();
-
  window.scrollTo({top:0,behavior:"smooth"});
-
 }
 
-
 // PANEL NAVIGATION
-
 function showPanel(panelId){
-
  document.querySelectorAll(".panel").forEach(panel=>{
   panel.style.display="none";
  });
-
- document.getElementById(panelId).style.display="block";
-
- document.getElementById(panelId).scrollIntoView({
-  behavior:"smooth",block:"start"
- });
-
+ $(panelId).style.display="block";
+ $(panelId).scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 function hidePanels(){
-
  document.querySelectorAll(".panel").forEach(panel=>{
   panel.style.display="none";
  });
-
 }
 
 async function openSellerPanel(){
-
  showPanel("sellerPanel");
  await loadSellerStatus();
-
 }
 
 async function openAdminPanel(){
-
  if(currentRole!=="admin"){
   alert("Administrator access required.");
   return;
  }
-
  showPanel("adminPanel");
  await loadAdminApplications();
-
 }
 
-
 // PROFILE
-
 async function saveProfile(){
-
  if(!currentUser)return;
 
- const fullName=document.getElementById("profileName").value.trim();
- const output=document.getElementById("profileMessage");
+ const fullName=$("profileName").value.trim();
+ const output=$("profileMessage");
 
  if(!fullName){
   output.textContent="Please enter your full name.";
@@ -926,7 +523,6 @@ async function saveProfile(){
  output.textContent="Saving...";
 
  try{
-
   const {error}=await supabaseClient
    .from("profiles")
    .update({full_name:fullName})
@@ -934,31 +530,23 @@ async function saveProfile(){
 
   if(error)throw error;
 
-  document.getElementById("dashboardName").textContent=fullName;
+  $("dashboardName").textContent=fullName;
   output.textContent="Your profile has been updated successfully!";
-
  }catch(error){
-
   output.textContent="Profile error: "+error.message;
-
  }
-
 }
 
-
 // SELLER APPLICATION STATUS
-
 async function loadSellerStatus(){
-
  if(!currentUser)return;
 
- const statusBox=document.getElementById("sellerCurrentStatus");
- const applicationForm=document.getElementById("sellerApplicationForm");
+ const statusBox=$("sellerCurrentStatus");
+ const applicationForm=$("sellerApplicationForm");
 
  statusBox.textContent="Checking your application...";
 
  try{
-
   const {data,error}=await supabaseClient
    .from("seller_applications")
    .select("*")
@@ -969,91 +557,66 @@ async function loadSellerStatus(){
   if(error)throw error;
 
   if(!data||data.length===0){
-
-   statusBox.innerHTML=
-    '<span class="status">NOT APPLIED</span><p>You have not submitted a seller application yet.</p>';
-
+   statusBox.innerHTML='<span class="status">NOT APPLIED</span><p>You have not submitted a seller application yet.</p>';
    applicationForm.style.display="block";
-   document.getElementById("publishPanel").style.display="none";
-
+   $("publishPanel").style.display="none";
    return;
-
   }
 
   const application=data[0];
+  const status=showStatus(application.status);
 
   statusBox.innerHTML="";
 
   const badge=document.createElement("span");
-  badge.className="status "+application.status;
-  badge.textContent=application.status.replace("_"," ").toUpperCase();
+  badge.className="status "+status;
+  badge.textContent=status.replace("_"," ").toUpperCase();
 
   const description=document.createElement("p");
   description.textContent=application.screening_reason||"Application received.";
 
-  statusBox.appendChild(badge);
-  statusBox.appendChild(description);
+  statusBox.append(badge,description);
 
-  if(application.status==="approved"){
-
-   statusBox.insertAdjacentHTML("beforeend",
-    "<p>Your seller application has been approved. You can now publish services.</p>");
-
+  if(status==="approved"){
+   statusBox.insertAdjacentHTML("beforeend","<p>Your seller application has been approved. You can now publish services.</p>");
    applicationForm.style.display="none";
 
    const publishButton=document.createElement("button");
    publishButton.className="gold";
    publishButton.textContent="Open Service Publishing";
-
-   publishButton.onclick=()=>{
+   publishButton.onclick=async()=>{
     showPanel("publishPanel");
-    loadMyServices();
+    await loadMyServices();
    };
-
    statusBox.appendChild(publishButton);
-
    await loadMyServices();
 
-  }else if(application.status==="pending_review"){
-
-   statusBox.insertAdjacentHTML("beforeend",
-    "<p>Your application is awaiting administrator review. Please wait for a decision.</p>");
-
+  }else if(status==="pending_review"){
+   statusBox.insertAdjacentHTML("beforeend","<p>Your application is awaiting administrator review. Please wait for a decision.</p>");
    applicationForm.style.display="none";
 
   }else{
-
-   statusBox.insertAdjacentHTML("beforeend",
-    "<p>Your application was not approved. You may submit a new application.</p>");
-
+   statusBox.insertAdjacentHTML("beforeend","<p>Your application was not approved. You may submit a new application.</p>");
    applicationForm.style.display="block";
-
   }
 
  }catch(error){
-
   statusBox.textContent="Unable to load application: "+error.message;
-
  }
-
 }
 
-
 // SUBMIT SELLER APPLICATION
-
 async function submitSellerApplication(){
-
  if(!currentUser){
   alert("Please log in first.");
   return;
  }
 
- const skill=document.getElementById("sellerSkill").value.trim();
- const experience=document.getElementById("sellerExperience").value.trim();
- const attested=document.getElementById("sellerAttestation").checked;
-
- const output=document.getElementById("sellerMessage");
- const button=document.getElementById("sellerSubmitButton");
+ const skill=$("sellerSkill").value.trim();
+ const experience=$("sellerExperience").value.trim();
+ const attested=$("sellerAttestation").checked;
+ const output=$("sellerMessage");
+ const button=$("sellerSubmitButton");
 
  if(skill.length<3){
   output.textContent="Please enter a valid professional skill.";
@@ -1075,6 +638,8 @@ async function submitSellerApplication(){
  output.textContent="Sending your application...";
 
  try{
+  // The database screening trigger must determine approved
+  // versus pending_review. The browser cannot grant approval.
 
   const {data,error}=await supabaseClient
    .from("seller_applications")
@@ -1089,40 +654,30 @@ async function submitSellerApplication(){
 
   if(error)throw error;
 
-  output.textContent="Application submitted successfully!";
+  output.textContent="Application submitted. Your database screening result will determine the next step.";
 
-  document.getElementById("sellerSkill").value="";
-  document.getElementById("sellerExperience").value="";
-  document.getElementById("sellerAttestation").checked=false;
+  $("sellerSkill").value="";
+  $("sellerExperience").value="";
+  $("sellerAttestation").checked=false;
 
   await loadSellerStatus();
 
  }catch(error){
-
   output.textContent="Application error: "+error.message;
-
  }finally{
-
   button.disabled=false;
   button.textContent="Submit Application";
-
  }
-
 }
 
-
-// ADMIN: LOAD APPLICATIONS
-
+// ADMIN: LOAD EXCEPTIONAL APPLICATIONS
 async function loadAdminApplications(){
-
  if(currentRole!=="admin"||!currentUser)return;
 
- const container=document.getElementById("adminApplications");
-
+ const container=$("adminApplications");
  container.textContent="Loading applications...";
 
  try{
-
   const {data,error}=await supabaseClient
    .from("seller_applications")
    .select("*")
@@ -1134,16 +689,11 @@ async function loadAdminApplications(){
   container.innerHTML="";
 
   if(!data||data.length===0){
-
-   container.innerHTML=
-    '<div class="empty">No exceptional applications are awaiting review.</div>';
-
+   container.innerHTML='<div class="empty">No exceptional applications are awaiting review.</div>';
    return;
-
   }
 
   data.forEach(application=>{
-
    const card=document.createElement("div");
    card.className="application-card";
 
@@ -1151,13 +701,13 @@ async function loadAdminApplications(){
    heading.textContent="Seller Application";
 
    const skill=document.createElement("p");
-   skill.textContent="Skill: "+application.skill;
+   skill.textContent="Skill: "+safeText(application.skill);
 
    const experience=document.createElement("p");
-   experience.textContent="Experience: "+application.experience;
+   experience.textContent="Experience: "+safeText(application.experience);
 
    const reason=document.createElement("p");
-   reason.textContent="Screening: "+(application.screening_reason||"Requires review");
+   reason.textContent="Screening: "+safeText(application.screening_reason||"Requires review");
 
    const date=document.createElement("p");
    date.textContent="Submitted: "+new Date(application.created_at).toLocaleString();
@@ -1165,43 +715,29 @@ async function loadAdminApplications(){
    const approve=document.createElement("button");
    approve.className="gold";
    approve.textContent="Approve";
-
    approve.onclick=()=>reviewApplication(application.id,"approved");
 
    const reject=document.createElement("button");
    reject.className="outline";
    reject.textContent="Reject";
-
    reject.onclick=()=>reviewApplication(application.id,"rejected");
 
    card.append(heading,skill,experience,reason,date,approve,reject);
    container.appendChild(card);
-
   });
 
  }catch(error){
-
   container.textContent="Admin error: "+error.message;
-
  }
-
 }
 
-
 // ADMIN: APPROVE OR REJECT
-
 async function reviewApplication(applicationId,decision){
-
  if(currentRole!=="admin")return;
 
- const confirmed=confirm(
-  "Are you sure you want to "+decision+" this seller application?"
- );
-
- if(!confirmed)return;
+ if(!confirm("Are you sure you want to "+decision+" this seller application?"))return;
 
  try{
-
   const {error}=await supabaseClient
    .from("seller_applications")
    .update({
@@ -1215,33 +751,38 @@ async function reviewApplication(applicationId,decision){
   if(error)throw error;
 
   alert("Application "+decision+" successfully.");
-
   await loadAdminApplications();
 
  }catch(error){
-
   alert("Review error: "+error.message);
-
  }
-
 }
 
+// CHECK SELLER APPROVAL
+async function isApprovedSeller(){
+ const {data,error}=await supabaseClient
+  .from("seller_applications")
+  .select("id")
+  .eq("user_id",currentUser.id)
+  .eq("status","approved")
+  .limit(1);
+
+ if(error)throw error;
+ return !!(data&&data.length);
+}
 
 // PUBLISH SERVICE
-
 async function publishService(){
-
  if(!currentUser)return;
 
- const title=document.getElementById("serviceTitle").value.trim();
- const category=document.getElementById("serviceCategory").value;
- const description=document.getElementById("serviceDescription").value.trim();
- const price=Number(document.getElementById("servicePrice").value);
+ const title=$("serviceTitle").value.trim();
+ const category=$("serviceCategory").value;
+ const description=$("serviceDescription").value.trim();
+ const price=Number($("servicePrice").value);
+ const output=$("publishMessage");
+ const button=$("publishButton");
 
- const output=document.getElementById("publishMessage");
- const button=document.getElementById("publishButton");
-
- if(!title||!category||!description||!price||price<=0){
+ if(!title||!category||!description||!Number.isFinite(price)||price<=0){
   output.textContent="Please complete all fields and enter a valid price.";
   return;
  }
@@ -1251,17 +792,7 @@ async function publishService(){
  output.textContent="Checking seller approval...";
 
  try{
-
-  const {data:applications,error:applicationError}=await supabaseClient
-   .from("seller_applications")
-   .select("id")
-   .eq("user_id",currentUser.id)
-   .eq("status","approved")
-   .limit(1);
-
-  if(applicationError)throw applicationError;
-
-  if(!applications||applications.length===0){
+  if(!(await isApprovedSeller())){
    throw new Error("You must have an approved seller application before publishing.");
   }
 
@@ -1280,42 +811,32 @@ async function publishService(){
 
   output.textContent="Your service has been published successfully!";
 
-  document.getElementById("serviceTitle").value="";
-  document.getElementById("serviceCategory").value="";
-  document.getElementById("serviceDescription").value="";
-  document.getElementById("servicePrice").value="";
+  $("serviceTitle").value="";
+  $("serviceCategory").value="";
+  $("serviceDescription").value="";
+  $("servicePrice").value="";
 
   await loadMyServices();
   await loadServices();
 
  }catch(error){
-
   output.textContent="Publishing error: "+error.message;
-
  }finally{
-
   button.disabled=false;
   button.textContent="Publish Service";
-
  }
-
 }
 
-
 // LOAD MY SERVICES
-
 async function loadMyServices(){
-
  if(!currentUser)return;
 
- const container=document.getElementById("myServices");
-
+ const container=$("myServices");
  if(!container)return;
 
  container.textContent="Loading your services...";
 
  try{
-
   const {data,error}=await supabaseClient
    .from("marketplace_services")
    .select("*")
@@ -1327,16 +848,11 @@ async function loadMyServices(){
   container.innerHTML="";
 
   if(!data||data.length===0){
-
-   container.innerHTML=
-    '<div class="empty">You have not published any services yet.</div>';
-
+   container.innerHTML='<div class="empty">You have not published any services yet.</div>';
    return;
-
   }
 
   data.forEach(service=>{
-
    const card=document.createElement("div");
    card.className="service-card";
 
@@ -1355,29 +871,18 @@ async function loadMyServices(){
 
    card.append(heading,description,category,price);
    container.appendChild(card);
-
   });
 
  }catch(error){
-
   container.textContent="Service loading error: "+error.message;
-
  }
-
 }
 
-
 // LOAD PUBLIC SERVICES
-
 async function loadServices(){
-
- const containers=[
-  document.getElementById("publicServices"),
-  document.getElementById("dashboardServices")
- ];
+ const containers=[$("publicServices"),$("dashboardServices")];
 
  try{
-
   const {data,error}=await supabaseClient
    .from("marketplace_services")
    .select("id,title,category,description,price_kes,seller_id")
@@ -1387,22 +892,15 @@ async function loadServices(){
   if(error)throw error;
 
   containers.forEach(container=>{
-
    if(!container)return;
-
    container.innerHTML="";
 
    if(!data||data.length===0){
-
-    container.innerHTML=
-     '<div class="empty">No services have been published yet. Be the first to offer your skills!</div>';
-
+    container.innerHTML='<div class="empty">No services have been published yet. Be the first to offer your skills!</div>';
     return;
-
    }
 
    data.forEach(service=>{
-
     const card=document.createElement("div");
     card.className="service-card";
 
@@ -1429,45 +927,29 @@ async function loadServices(){
     }
 
     container.appendChild(card);
-
    });
-
   });
 
  }catch(error){
-
   containers.forEach(container=>{
    if(container)container.textContent="Marketplace error: "+error.message;
   });
-
  }
-
 }
 
-
 // LOGOUT
-
 async function logout(){
-
  if(!confirm("Are you sure you want to log out?"))return;
 
  try{
-
   const {error}=await supabaseClient.auth.signOut();
-
   if(error)throw error;
-
   showHomepage();
-
  }catch(error){
-
   alert("Logout error: "+error.message);
-
  }
-
 }
 
 </script>
-
 </body>
 </html>
