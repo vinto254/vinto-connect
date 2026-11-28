@@ -693,6 +693,19 @@ document.getElementById("authForm").addEventListener("submit", async function(e)
     } else {
 
     message.textContent = "Welcome back to VINTO CONNECT! Login successful.";
+      const loggedInUser = result.data.user;
+
+const { data: profile } = await supabaseClient
+  .from("profiles")
+  .select("full_name")
+  .eq("id", loggedInUser.id)
+  .maybeSingle();
+
+document.getElementById("dashboardName").textContent =
+  profile?.full_name || loggedInUser.email.split("@")[0];
+
+document.getElementById("dashboardEmail").textContent =
+  loggedInUser.email;
 
 document.getElementById("vintoDashboard").style.display = "block";
 document.getElementById("vintoDashboard").scrollIntoView({
@@ -725,7 +738,9 @@ document.getElementById("vintoDashboard").scrollIntoView({
     <p style="color:#aaa;">Your professional workspace</p>
   </div>
 
-  <h2 style="margin-top:40px;">Welcome to your dashboard</h2>
+  <h2 style="margin-top:40px;">Welcome, <span id="dashboardName">User</span>!</h2>
+
+<p id="dashboardEmail" style="color:#d9b66b;"></p>
   <p style="color:#aaa; margin-top:10px;">Connect. Discover. Grow.</p>
 
   <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-top:35px;">
