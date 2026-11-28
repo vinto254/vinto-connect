@@ -154,6 +154,7 @@ footer{border-top:1px solid #292929;padding:28px 8%;display:flex;justify-content
   <div class="card" role="button" tabindex="0" onclick="filterCategory('Virtual Assistance')"><div class="icon">◎</div><h3>Virtual Assistance</h3><p>Online administrative support.</p></div>
   <div class="card" role="button" tabindex="0" onclick="filterCategory('Education')"><div class="icon">✧</div><h3>Education</h3><p>Tutoring and educational services.</p></div>
   <div class="card" role="button" tabindex="0" onclick="filterCategory('Business Services')"><div class="icon">▣</div><h3>Business Services</h3><p>Professional business solutions.</p></div>
+  <div class="card" role="button" tabindex="0" onclick="filterCategory('Other')"><div class="icon">✦</div><h3>Other Categories</h3><p>Explore additional services that do not fit the categories above.</p></div>
  </div>
 
  <div style="max-width:950px;margin:40px auto 0">
@@ -351,7 +352,7 @@ function filterCategory(category){
  activeCategory=category||"";
 
  $("categoryMessage").textContent=activeCategory
-  ?"Showing services in: "+activeCategory
+  ?"Showing services in: "+(activeCategory==="Other"?"Other Categories":activeCategory)
   :"Showing all available services";
 
  $("showAllButton").style.display=activeCategory?"inline-block":"none";
@@ -1195,5 +1196,6 @@ document.querySelectorAll(".card[role='button']").forEach(card=>{
 </body>
 </html>
 ```
+
 
 
