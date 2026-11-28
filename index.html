@@ -692,7 +692,12 @@ document.getElementById("authForm").addEventListener("submit", async function(e)
 
     } else {
 
-      message.textContent = "Welcome back to VINTO CONNECT! Login successful.";
+    message.textContent = "Welcome back to VINTO CONNECT! Login successful.";
+
+document.getElementById("vintoDashboard").style.display = "block";
+document.getElementById("vintoDashboard").scrollIntoView({
+  behavior: "smooth"
+});
 
     }
 
@@ -712,6 +717,45 @@ document.getElementById("authForm").addEventListener("submit", async function(e)
 });
 
 </script>
+<!-- VINTO USER DASHBOARD -->
+<section id="vintoDashboard" style="display:none; padding:50px 8%; background:#090909; min-height:100vh;">
+
+  <div style="border-bottom:1px solid #d9b66b; padding-bottom:25px;">
+    <h1 style="color:#d9b66b; font-size:32px;">♛ VINTO CONNECT</h1>
+    <p style="color:#aaa;">Your professional workspace</p>
+  </div>
+
+  <h2 style="margin-top:40px;">Welcome to your dashboard</h2>
+  <p style="color:#aaa; margin-top:10px;">Connect. Discover. Grow.</p>
+
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-top:35px;">
+
+    <div style="background:#181818; padding:25px; border:1px solid #d9b66b;">
+      <h3 style="color:#d9b66b;">My Profile</h3>
+      <p style="color:#aaa; margin-top:12px;">Manage your personal information.</p>
+      <button class="gold" style="margin-top:20px;">View Profile</button>
+    </div>
+
+    <div style="background:#181818; padding:25px; border:1px solid #d9b66b;">
+      <h3 style="color:#d9b66b;">Marketplace</h3>
+      <p style="color:#aaa; margin-top:12px;">Explore freelance services worldwide.</p>
+      <button class="gold" style="margin-top:20px;">Explore Services</button>
+    </div>
+
+    <div style="background:#181818; padding:25px; border:1px solid #d9b66b;">
+      <h3 style="color:#d9b66b;">Become a Seller</h3>
+      <p style="color:#aaa; margin-top:12px;">Offer your skills to global clients.</p>
+      <button class="gold" style="margin-top:20px;">Apply Now</button>
+    </div>
+
+    <div style="background:#181818; padding:25px; border:1px solid #d9b66b;">
+      <h3 style="color:#d9b66b;">My Orders</h3>
+      <p style="color:#aaa; margin-top:12px;">Manage your transactions and orders.</p>
+      <button class="gold" style="margin-top:20px;">View Orders</button>
+    </div>
+
+  </div>
+</section>  
 
 </body>
 </html>
