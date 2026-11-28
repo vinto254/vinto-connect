@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,11 +80,14 @@ footer{border-top:1px solid #292929;padding:28px 8%;display:flex;justify-content
 .status.approved{background:#164b2b;color:#8dffae}
 .status.pending_review{background:#59451c;color:#ffdc8a}
 .status.rejected{background:#592020;color:#ff9999}
-.application-card,.service-card{background:#202020;border:1px solid #493a20;padding:20px;margin:15px 0}
-.application-card h3,.service-card h3{color:var(--gold);margin-bottom:10px}
-.application-card p,.service-card p{font-size:13px;overflow-wrap:anywhere}
+.application-card,.service-card,.order-card{background:#202020;border:1px solid #493a20;padding:20px;margin:15px 0}
+.application-card h3,.service-card h3,.order-card h3{color:var(--gold);margin-bottom:10px}
+.application-card p,.service-card p,.order-card p{font-size:13px;overflow-wrap:anywhere}
 .price{color:var(--gold);font-weight:bold}
 .small-note{font-size:12px;color:#999}
+.order-card select{max-width:300px}
+.order-status{display:inline-block;padding:7px 11px;background:#393126;color:#f2d28d;font-size:12px;margin:8px 0;border-radius:3px}
+.buy-button{margin-top:12px}
 @media(max-width:850px){
  nav{display:none}.hero{padding:70px 7%}.emblem{font-size:150px}h1{font-size:45px}
  .grid,.dash-grid{grid-template-columns:repeat(2,1fr)}
@@ -215,15 +218,15 @@ footer{border-top:1px solid #292929;padding:28px 8%;display:flex;justify-content
   </div>
   <div class="dash-card">
    <h3>Marketplace</h3><p>Explore freelance services worldwide.</p>
-   <button class="gold" onclick="showPanel('marketPanel')">Explore Services</button>
+   <button class="gold" onclick="showPanel('marketPanel');loadServices()">Explore Services</button>
   </div>
   <div class="dash-card">
    <h3>Become a Seller</h3><p>Apply to offer your skills to global clients.</p>
    <button class="gold" onclick="openSellerPanel()">Apply Now</button>
   </div>
   <div class="dash-card">
-   <h3>My Orders</h3><p>Manage your transactions and orders.</p>
-   <button class="gold" onclick="showPanel('ordersPanel')">View Orders</button>
+   <h3>My Orders</h3><p>View purchases and orders received from clients.</p>
+   <button class="gold" onclick="openOrdersPanel()">View Orders</button>
   </div>
   <div class="dash-card" id="adminCard" style="display:none">
    <h3>Admin Control</h3><p>Review exceptional seller applications.</p>
@@ -288,8 +291,13 @@ footer{border-top:1px solid #292929;padding:28px 8%;display:flex;justify-content
 
  <div class="panel" id="ordersPanel">
   <h2>My Orders</h2>
-  <p>Your freelance transactions and orders will appear here.</p>
-  <div class="empty">You have no orders yet. Explore the marketplace to discover services.</div>
+  <p>Track services you have purchased and orders placed by your customers.</p>
+  <button class="outline" onclick="loadOrders()">Refresh Orders</button>
+  <h2 style="font-size:22px;margin-top:30px">Orders I Placed</h2>
+  <div id="buyerOrders"><div class="empty">Loading your purchases...</div></div>
+  <h2 style="font-size:22px;margin-top:30px">Orders I Received</h2>
+  <div id="sellerOrders"><div class="empty">Loading received orders...</div></div>
+  <p class="small-note">Order creation is available. M-Pesa payments have not yet been connected.</p>
  </div>
 
  <div class="panel" id="adminPanel">
@@ -306,24 +314,27 @@ footer{border-top:1px solid #292929;padding:28px 8%;display:flex;justify-content
 // SUPABASE CONNECTION
 const SUPABASE_URL="https://yfpouojpeqyxxodyqlup.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_etcRn5iRFJ2oaUXvWhE8dw_qy8DUUUq";
-
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
 let authMode="signup";
 let currentUser=null;
 let currentRole="buyer";
-let sessionReady=false;
 
 // HELPERS
 function $(id){return document.getElementById(id)}
-
-function safeText(value){
- return String(value??"");
-}
+function safeText(value){return String(value??"")}
 
 function showStatus(status){
  const known=["approved","pending_review","rejected"];
  return known.includes(status)?status:"pending_review";
+}
+
+function addTextElement(parent,tag,text,className){
+ const element=document.createElement(tag);
+ element.textContent=safeText(text);
+ if(className)element.className=className;
+ parent.appendChild(element);
+ return element;
 }
 
 // AUTHENTICATION
@@ -338,15 +349,12 @@ function openAuth(mode){
  $("authForm").reset();
 }
 
-function closeAuth(){
- $("authModal").style.display="none";
-}
+function closeAuth(){$("authModal").style.display="none"}
 
 $("authModal").addEventListener("click",function(e){
  if(e.target===this)closeAuth();
 });
 
-// REGISTER AND LOGIN
 $("authForm").addEventListener("submit",async function(e){
  e.preventDefault();
 
@@ -442,12 +450,10 @@ async function openDashboard(user){
  await loadMyServices();
 }
 
-// RESTORE SESSION
 async function restoreSession(){
  try{
   const {data,error}=await supabaseClient.auth.getSession();
   if(error)throw error;
-  sessionReady=true;
 
   if(data.session){
    await openDashboard(data.session.user);
@@ -459,7 +465,6 @@ async function restoreSession(){
  }
 }
 
-// AUTH STATE LISTENER
 supabaseClient.auth.onAuthStateChange((event,session)=>{
  if(event==="SIGNED_OUT"){
   currentUser=null;
@@ -497,6 +502,11 @@ function hidePanels(){
 async function openSellerPanel(){
  showPanel("sellerPanel");
  await loadSellerStatus();
+}
+
+async function openOrdersPanel(){
+ showPanel("ordersPanel");
+ await loadOrders();
 }
 
 async function openAdminPanel(){
@@ -638,19 +648,14 @@ async function submitSellerApplication(){
  output.textContent="Sending your application...";
 
  try{
-  // The database screening trigger must determine approved
-  // versus pending_review. The browser cannot grant approval.
-
-  const {data,error}=await supabaseClient
+  const {error}=await supabaseClient
    .from("seller_applications")
    .insert({
     user_id:currentUser.id,
     skill:skill,
     experience:experience,
     self_attested:true
-   })
-   .select()
-   .single();
+   });
 
   if(error)throw error;
 
@@ -697,20 +702,11 @@ async function loadAdminApplications(){
    const card=document.createElement("div");
    card.className="application-card";
 
-   const heading=document.createElement("h3");
-   heading.textContent="Seller Application";
-
-   const skill=document.createElement("p");
-   skill.textContent="Skill: "+safeText(application.skill);
-
-   const experience=document.createElement("p");
-   experience.textContent="Experience: "+safeText(application.experience);
-
-   const reason=document.createElement("p");
-   reason.textContent="Screening: "+safeText(application.screening_reason||"Requires review");
-
-   const date=document.createElement("p");
-   date.textContent="Submitted: "+new Date(application.created_at).toLocaleString();
+   addTextElement(card,"h3","Seller Application");
+   addTextElement(card,"p","Skill: "+safeText(application.skill));
+   addTextElement(card,"p","Experience: "+safeText(application.experience));
+   addTextElement(card,"p","Screening: "+safeText(application.screening_reason||"Requires review"));
+   addTextElement(card,"p","Submitted: "+new Date(application.created_at).toLocaleString());
 
    const approve=document.createElement("button");
    approve.className="gold";
@@ -722,7 +718,7 @@ async function loadAdminApplications(){
    reject.textContent="Reject";
    reject.onclick=()=>reviewApplication(application.id,"rejected");
 
-   card.append(heading,skill,experience,reason,date,approve,reject);
+   card.append(approve,reject);
    container.appendChild(card);
   });
 
@@ -856,25 +852,54 @@ async function loadMyServices(){
    const card=document.createElement("div");
    card.className="service-card";
 
-   const heading=document.createElement("h3");
-   heading.textContent=service.title;
+   addTextElement(card,"h3",service.title);
+   addTextElement(card,"p",service.description);
+   addTextElement(card,"p","Category: "+service.category);
+   addTextElement(card,"p","KES "+Number(service.price_kes).toLocaleString(),"price");
+   addTextElement(card,"p",service.is_published?"Published":"Not published","small-note");
 
-   const description=document.createElement("p");
-   description.textContent=service.description;
-
-   const category=document.createElement("p");
-   category.textContent="Category: "+service.category;
-
-   const price=document.createElement("p");
-   price.className="price";
-   price.textContent="KES "+Number(service.price_kes).toLocaleString();
-
-   card.append(heading,description,category,price);
    container.appendChild(card);
   });
 
  }catch(error){
   container.textContent="Service loading error: "+error.message;
+ }
+}
+
+// BUY NOW
+async function buyService(serviceId,button){
+ if(!currentUser){
+  alert("Please log in to place an order.");
+  openAuth("login");
+  return;
+ }
+
+ if(!confirm("Do you want to place an order for this service?"))return;
+
+ button.disabled=true;
+ button.textContent="Creating order...";
+
+ try{
+  const {data,error}=await supabaseClient.rpc(
+   "place_service_order",
+   {p_service_id:serviceId}
+  );
+
+  if(error)throw error;
+
+  alert("Your order has been placed successfully!");
+
+  await loadOrders();
+
+  if($("ordersPanel").style.display==="block"){
+   $("ordersPanel").scrollIntoView({behavior:"smooth"});
+  }
+
+ }catch(error){
+  alert("Order error: "+error.message);
+ }finally{
+  button.disabled=false;
+  button.textContent="Buy Now";
  }
 }
 
@@ -904,26 +929,19 @@ async function loadServices(){
     const card=document.createElement("div");
     card.className="service-card";
 
-    const heading=document.createElement("h3");
-    heading.textContent=service.title;
-
-    const category=document.createElement("p");
-    category.textContent="Category: "+service.category;
-
-    const description=document.createElement("p");
-    description.textContent=service.description;
-
-    const price=document.createElement("p");
-    price.className="price";
-    price.textContent="KES "+Number(service.price_kes).toLocaleString();
-
-    card.append(heading,category,description,price);
+    addTextElement(card,"h3",service.title);
+    addTextElement(card,"p","Category: "+service.category);
+    addTextElement(card,"p",service.description);
+    addTextElement(card,"p","KES "+Number(service.price_kes).toLocaleString(),"price");
 
     if(currentUser&&service.seller_id===currentUser.id){
-     const own=document.createElement("p");
-     own.className="small-note";
-     own.textContent="Your service";
-     card.appendChild(own);
+     addTextElement(card,"p","Your service","small-note");
+    }else{
+     const buyButton=document.createElement("button");
+     buyButton.className="gold buy-button";
+     buyButton.textContent="Buy Now";
+     buyButton.onclick=()=>buyService(service.id,buyButton);
+     card.appendChild(buyButton);
     }
 
     container.appendChild(card);
@@ -934,6 +952,155 @@ async function loadServices(){
   containers.forEach(container=>{
    if(container)container.textContent="Marketplace error: "+error.message;
   });
+ }
+}
+
+// LOAD BUYER AND SELLER ORDERS
+async function loadOrders(){
+ if(!currentUser)return;
+
+ const buyerContainer=$("buyerOrders");
+ const sellerContainer=$("sellerOrders");
+
+ buyerContainer.textContent="Loading your purchases...";
+ sellerContainer.textContent="Loading received orders...";
+
+ try{
+  const {data:orders,error}=await supabaseClient
+   .from("orders")
+   .select("*")
+   .or("buyer_id.eq."+currentUser.id+",seller_id.eq."+currentUser.id)
+   .order("created_at",{ascending:false});
+
+  if(error)throw error;
+
+  const allOrders=orders||[];
+  const buyerOrders=allOrders.filter(order=>order.buyer_id===currentUser.id);
+  const sellerOrders=allOrders.filter(order=>order.seller_id===currentUser.id);
+
+  const serviceIds=[...new Set(allOrders.map(order=>order.service_id).filter(Boolean))];
+  let serviceMap={};
+
+  if(serviceIds.length){
+   const {data:services,error:serviceError}=await supabaseClient
+    .from("marketplace_services")
+    .select("id,title")
+    .in("id",serviceIds);
+
+   if(serviceError)throw serviceError;
+
+   (services||[]).forEach(service=>{
+    serviceMap[String(service.id)]=service.title;
+   });
+  }
+
+  buyerContainer.innerHTML="";
+  sellerContainer.innerHTML="";
+
+  if(!buyerOrders.length){
+   buyerContainer.innerHTML='<div class="empty">You have not placed any orders yet. Explore the marketplace to find a service.</div>';
+  }else{
+   buyerOrders.forEach(order=>{
+    buyerContainer.appendChild(createOrderCard(order,serviceMap[ String(order.service_id)]||"Service",false));
+   });
+  }
+
+  if(!sellerOrders.length){
+   sellerContainer.innerHTML='<div class="empty">You have not received any orders yet.</div>';
+  }else{
+   sellerOrders.forEach(order=>{
+    sellerContainer.appendChild(createOrderCard(order,serviceMap[String(order.service_id)]||"Service",true));
+   });
+  }
+
+ }catch(error){
+  buyerContainer.textContent="Orders error: "+error.message;
+  sellerContainer.textContent="Orders error: "+error.message;
+ }
+}
+
+// CREATE ORDER DISPLAY CARD
+function createOrderCard(order,serviceTitle,isSeller){
+ const card=document.createElement("div");
+ card.className="order-card";
+
+ addTextElement(card,"h3",serviceTitle);
+ addTextElement(card,"p","Order ID: "+order.id);
+ addTextElement(card,"p","Amount: "+safeText(order.currency||"KES")+" "+Number(order.amount).toLocaleString());
+ addTextElement(card,"p",isSeller?"Buyer ID: "+order.buyer_id:"Seller ID: "+order.seller_id);
+
+ const status=document.createElement("span");
+ status.className="order-status";
+ status.textContent="Status: "+safeText(order.status||"pending").replaceAll("_"," ").toUpperCase();
+ card.appendChild(status);
+
+ addTextElement(card,"p","Created: "+(order.created_at?new Date(order.created_at).toLocaleString():""));
+
+ if(isSeller){
+  const label=document.createElement("label");
+  label.textContent="Update order status";
+  card.appendChild(label);
+
+  const select=document.createElement("select");
+  ["pending","in_progress","completed","cancelled"].forEach(value=>{
+   const option=document.createElement("option");
+   option.value=value;
+   option.textContent=value.replaceAll("_"," ").toUpperCase();
+   if(order.status===value)option.selected=true;
+   select.appendChild(option);
+  });
+  card.appendChild(select);
+
+  const updateButton=document.createElement("button");
+  updateButton.className="gold";
+  updateButton.textContent="Update Status";
+  updateButton.onclick=()=>updateOrderStatus(order.id,select.value,updateButton);
+  card.appendChild(updateButton);
+ }
+
+ return card;
+}
+
+// SELLER UPDATES ORDER STATUS
+async function updateOrderStatus(orderId,newStatus,button){
+ if(!currentUser)return;
+
+ const allowed=["pending","in_progress","completed","cancelled"];
+ if(!allowed.includes(newStatus)){
+  alert("Invalid order status.");
+  return;
+ }
+
+ if(!confirm("Change this order status to "+newStatus.replaceAll("_"," ")+"?"))return;
+
+ button.disabled=true;
+ button.textContent="Updating...";
+
+ try{
+  const {data,error}=await supabaseClient
+   .from("orders")
+   .update({
+    status:newStatus,
+    updated_at:new Date().toISOString()
+   })
+   .eq("id",orderId)
+   .eq("seller_id",currentUser.id)
+   .select();
+
+  if(error)throw error;
+
+  if(!data||data.length===0){
+   throw new Error("The order was not updated. Check seller update permissions and RLS policies.");
+  }
+
+  alert("Order status updated successfully.");
+  await loadOrders();
+
+ }catch(error){
+  alert("Status update error: "+error.message);
+ }finally{
+  button.disabled=false;
+  button.textContent="Update Status";
  }
 }
 
@@ -949,7 +1116,8 @@ async function logout(){
   alert("Logout error: "+error.message);
  }
 }
-
 </script>
 </body>
 </html>
+```
+
