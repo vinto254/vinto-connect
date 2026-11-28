@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VINTO CONNECT | Connect. Discover. Grow.</title>
 <meta name="description" content="Discover talent, freelance services and opportunities worldwide.">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -38,8 +37,8 @@ section.market{padding:80px 8%}
 .heading h2,.trust h2,.join h2{font:40px Georgia,serif;margin:18px 0}
 .heading p,.trust p,.join p{color:var(--muted);line-height:1.8}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-.card{background:#141414;border:1px solid #302a20;padding:25px 20px;min-height:165px;transition:.2s}
-.card:hover{border-color:var(--gold);transform:translateY(-4px)}
+.card{background:#141414;border:1px solid #302a20;padding:25px 20px;min-height:165px;transition:.2s;cursor:pointer}
+.card:hover,.card:focus{border-color:var(--gold);transform:translateY(-4px);outline:none}
 .card .icon{font-size:27px;color:var(--gold)}
 .card h3{margin:17px 0 10px;font:20px Georgia,serif}
 .card p{color:#999;font-size:13px;line-height:1.6}
@@ -88,6 +87,8 @@ footer{border-top:1px solid #292929;padding:28px 8%;display:flex;justify-content
 .order-card select{max-width:300px}
 .order-status{display:inline-block;padding:7px 11px;background:#393126;color:#f2d28d;font-size:12px;margin:8px 0;border-radius:3px}
 .buy-button{margin-top:12px}
+.category-tools{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin:30px 0 12px}
+#categoryMessage{color:var(--gold);font-size:14px;text-align:center;margin:15px 0}
 @media(max-width:850px){
  nav{display:none}.hero{padding:70px 7%}.emblem{font-size:150px}h1{font-size:45px}
  .grid,.dash-grid{grid-template-columns:repeat(2,1fr)}
@@ -125,7 +126,7 @@ footer{border-top:1px solid #292929;padding:28px 8%;display:flex;justify-content
   <p>Discover exceptional talent, offer your skills and explore opportunities. VINTO CONNECT brings freelancers and clients together from every corner of the world.</p>
   <div class="hero-buttons">
    <button class="gold" onclick="openAuth('signup')">Get started ↗</button>
-   <button class="outline" onclick="document.getElementById('marketplace').scrollIntoView()">Explore marketplace</button>
+   <button class="outline" onclick="$('marketplace').scrollIntoView()">Explore marketplace</button>
   </div>
  </div>
  <div class="emblem">V</div>
@@ -143,18 +144,24 @@ footer{border-top:1px solid #292929;padding:28px 8%;display:flex;justify-content
   <h2>Find the right <span>talent.</span></h2>
   <p>Whatever your project needs, discover the right expertise.</p>
  </div>
+
  <div class="grid">
-  <div class="card"><div class="icon">✳</div><h3>Graphic Design</h3><p>Logos, branding, posters and creative designs.</p></div>
-  <div class="card"><div class="icon">⌘</div><h3>Programming</h3><p>Websites, applications and software solutions.</p></div>
-  <div class="card"><div class="icon">✎</div><h3>Writing</h3><p>Articles, content writing and editing.</p></div>
-  <div class="card"><div class="icon">◈</div><h3>Marketing</h3><p>Social media and digital marketing services.</p></div>
-  <div class="card"><div class="icon">▶</div><h3>Video Editing</h3><p>Video production and creative editing.</p></div>
-  <div class="card"><div class="icon">◎</div><h3>Virtual Assistance</h3><p>Online administrative support.</p></div>
-  <div class="card"><div class="icon">✧</div><h3>Education</h3><p>Tutoring and educational services.</p></div>
-  <div class="card"><div class="icon">▣</div><h3>Business Services</h3><p>Professional business solutions.</p></div>
+  <div class="card" role="button" tabindex="0" onclick="filterCategory('Graphic Design')"><div class="icon">✳</div><h3>Graphic Design</h3><p>Logos, branding, posters and creative designs.</p></div>
+  <div class="card" role="button" tabindex="0" onclick="filterCategory('Programming')"><div class="icon">⌘</div><h3>Programming</h3><p>Websites, applications and software solutions.</p></div>
+  <div class="card" role="button" tabindex="0" onclick="filterCategory('Writing')"><div class="icon">✎</div><h3>Writing</h3><p>Articles, content writing and editing.</p></div>
+  <div class="card" role="button" tabindex="0" onclick="filterCategory('Marketing')"><div class="icon">◈</div><h3>Marketing</h3><p>Social media and digital marketing services.</p></div>
+  <div class="card" role="button" tabindex="0" onclick="filterCategory('Video Editing')"><div class="icon">▶</div><h3>Video Editing</h3><p>Video production and creative editing.</p></div>
+  <div class="card" role="button" tabindex="0" onclick="filterCategory('Virtual Assistance')"><div class="icon">◎</div><h3>Virtual Assistance</h3><p>Online administrative support.</p></div>
+  <div class="card" role="button" tabindex="0" onclick="filterCategory('Education')"><div class="icon">✧</div><h3>Education</h3><p>Tutoring and educational services.</p></div>
+  <div class="card" role="button" tabindex="0" onclick="filterCategory('Business Services')"><div class="icon">▣</div><h3>Business Services</h3><p>Professional business solutions.</p></div>
  </div>
+
  <div style="max-width:950px;margin:40px auto 0">
   <h2 style="color:var(--gold);font:30px Georgia,serif;text-align:center">Available Services</h2>
+  <div class="category-tools">
+   <span id="categoryMessage">Showing all available services</span>
+   <button class="outline" id="showAllButton" onclick="filterCategory('')" style="display:none">Show All Services</button>
+  </div>
   <div id="publicServices"><div class="empty">Loading available services...</div></div>
  </div>
 </section>
@@ -319,6 +326,8 @@ const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY
 let authMode="signup";
 let currentUser=null;
 let currentRole="buyer";
+let allPublicServices=[];
+let activeCategory="";
 
 // HELPERS
 function $(id){return document.getElementById(id)}
@@ -335,6 +344,61 @@ function addTextElement(parent,tag,text,className){
  if(className)element.className=className;
  parent.appendChild(element);
  return element;
+}
+
+// CATEGORY FILTERING
+function filterCategory(category){
+ activeCategory=category||"";
+
+ $("categoryMessage").textContent=activeCategory
+  ?"Showing services in: "+activeCategory
+  :"Showing all available services";
+
+ $("showAllButton").style.display=activeCategory?"inline-block":"none";
+
+ renderPublicServices();
+
+ $("publicServices").scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+function renderPublicServices(){
+ const container=$("publicServices");
+ if(!container)return;
+
+ container.innerHTML="";
+
+ const filtered=activeCategory
+  ?allPublicServices.filter(service=>
+    safeText(service.category).trim().toLowerCase()===activeCategory.toLowerCase()
+   )
+  :allPublicServices;
+
+ if(!filtered.length){
+  container.innerHTML='<div class="empty">No services found in this category yet. Try another category or select Show All Services.</div>';
+  return;
+ }
+
+ filtered.forEach(service=>{
+  const card=document.createElement("div");
+  card.className="service-card";
+
+  addTextElement(card,"h3",service.title);
+  addTextElement(card,"p","Category: "+service.category);
+  addTextElement(card,"p",service.description);
+  addTextElement(card,"p","KES "+Number(service.price_kes).toLocaleString(),"price");
+
+  if(currentUser&&service.seller_id===currentUser.id){
+   addTextElement(card,"p","This is your own service. Use another buyer account to place an order.","small-note");
+  }else{
+   const buyButton=document.createElement("button");
+   buyButton.className="gold buy-button";
+   buyButton.textContent="Buy Now";
+   buyButton.onclick=()=>buyService(service.id,buyButton);
+   card.appendChild(buyButton);
+  }
+
+  container.appendChild(card);
+ });
 }
 
 // AUTHENTICATION
@@ -890,10 +954,7 @@ async function buyService(serviceId,button){
   alert("Your order has been placed successfully!");
 
   await loadOrders();
-
-  if($("ordersPanel").style.display==="block"){
-   $("ordersPanel").scrollIntoView({behavior:"smooth"});
-  }
+  showPanel("ordersPanel");
 
  }catch(error){
   alert("Order error: "+error.message);
@@ -905,7 +966,8 @@ async function buyService(serviceId,button){
 
 // LOAD PUBLIC SERVICES
 async function loadServices(){
- const containers=[$("publicServices"),$("dashboardServices")];
+ const dashboardContainer=$("dashboardServices");
+ const publicContainer=$("publicServices");
 
  try{
   const {data,error}=await supabaseClient
@@ -916,42 +978,45 @@ async function loadServices(){
 
   if(error)throw error;
 
-  containers.forEach(container=>{
-   if(!container)return;
-   container.innerHTML="";
+  allPublicServices=data||[];
 
-   if(!data||data.length===0){
-    container.innerHTML='<div class="empty">No services have been published yet. Be the first to offer your skills!</div>';
-    return;
+  // Homepage category results
+  renderPublicServices();
+
+  // Dashboard marketplace always shows all services
+  if(dashboardContainer){
+   dashboardContainer.innerHTML="";
+
+   if(!allPublicServices.length){
+    dashboardContainer.innerHTML='<div class="empty">No services have been published yet. Be the first to offer your skills!</div>';
+   }else{
+    allPublicServices.forEach(service=>{
+     const card=document.createElement("div");
+     card.className="service-card";
+
+     addTextElement(card,"h3",service.title);
+     addTextElement(card,"p","Category: "+service.category);
+     addTextElement(card,"p",service.description);
+     addTextElement(card,"p","KES "+Number(service.price_kes).toLocaleString(),"price");
+
+     if(currentUser&&service.seller_id===currentUser.id){
+      addTextElement(card,"p","This is your own service.","small-note");
+     }else{
+      const buyButton=document.createElement("button");
+      buyButton.className="gold buy-button";
+      buyButton.textContent="Buy Now";
+      buyButton.onclick=()=>buyService(service.id,buyButton);
+      card.appendChild(buyButton);
+     }
+
+     dashboardContainer.appendChild(card);
+    });
    }
-
-   data.forEach(service=>{
-    const card=document.createElement("div");
-    card.className="service-card";
-
-    addTextElement(card,"h3",service.title);
-    addTextElement(card,"p","Category: "+service.category);
-    addTextElement(card,"p",service.description);
-    addTextElement(card,"p","KES "+Number(service.price_kes).toLocaleString(),"price");
-
-    if(currentUser&&service.seller_id===currentUser.id){
-     addTextElement(card,"p","Your service","small-note");
-    }else{
-     const buyButton=document.createElement("button");
-     buyButton.className="gold buy-button";
-     buyButton.textContent="Buy Now";
-     buyButton.onclick=()=>buyService(service.id,buyButton);
-     card.appendChild(buyButton);
-    }
-
-    container.appendChild(card);
-   });
-  });
+  }
 
  }catch(error){
-  containers.forEach(container=>{
-   if(container)container.textContent="Marketplace error: "+error.message;
-  });
+  if(publicContainer)publicContainer.textContent="Marketplace error: "+error.message;
+  if(dashboardContainer)dashboardContainer.textContent="Marketplace error: "+error.message;
  }
 }
 
@@ -1001,7 +1066,7 @@ async function loadOrders(){
    buyerContainer.innerHTML='<div class="empty">You have not placed any orders yet. Explore the marketplace to find a service.</div>';
   }else{
    buyerOrders.forEach(order=>{
-    buyerContainer.appendChild(createOrderCard(order,serviceMap[ String(order.service_id)]||"Service",false));
+    buyerContainer.appendChild(createOrderCard(order,serviceMap[String(order.service_id)]||"Service",false));
    });
   }
 
@@ -1116,8 +1181,19 @@ async function logout(){
   alert("Logout error: "+error.message);
  }
 }
+
+// Allow keyboard users to activate category cards
+document.querySelectorAll(".card[role='button']").forEach(card=>{
+ card.addEventListener("keydown",function(event){
+  if(event.key==="Enter"||event.key===" "){
+   event.preventDefault();
+   card.click();
+  }
+ });
+});
 </script>
 </body>
 </html>
 ```
+
 
